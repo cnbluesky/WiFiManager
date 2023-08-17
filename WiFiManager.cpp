@@ -2061,7 +2061,7 @@ void WiFiManager::handleInfo() {
   }
   if(_showInfoErase) page += FPSTR(HTTP_ERASEBTN);
   if(_showBack) page += FPSTR(HTTP_BACKBTN);
-  page += FPSTR(HTTP_HELP);
+  // page += FPSTR(HTTP_HELP);
   page += FPSTR(HTTP_END);
 
   HTTPSend(page);
