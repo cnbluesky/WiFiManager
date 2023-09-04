@@ -589,7 +589,7 @@ class WiFiManager
     const char*   _customMenuHTML         = ""; // store custom head element html from user inside <>
     String        _bodyClass              = ""; // class to add to body
     // String        _title                  = FPSTR(S_brand); // app title -  default WiFiManager
-    String        _title                  = "fofotu";
+    String        _title                  = "FoloToy";
 
     // internal options
     
