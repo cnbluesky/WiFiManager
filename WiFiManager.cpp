@@ -348,83 +348,78 @@ boolean WiFiManager::autoConnect(char const *apName, char const *apPassword)
   // check if wifi is saved, (has autoconnect) to speed up cp start
   // NOT wifi init safe
   // if(wifiIsSaved){
-  int maxRetries = 3;
+  _startconn = millis();
+  _begin();
 
-  for (int retry = 0; retry < maxRetries; ++retry)
+  // attempt to connect using saved settings, on fail fallback to AP config portal
+  if (!WiFi.enableSTA(true))
   {
-    _startconn = millis();
-    _begin();
-
-    // attempt to connect using saved settings, on fail fallback to AP config portal
-    if (!WiFi.enableSTA(true))
-    {
 // handle failure mode Brownout detector etc.
 #ifdef WM_DEBUG_LEVEL
-      DEBUG_WM(DEBUG_ERROR, F("[FATAL] Unable to enable wifi!"));
+    DEBUG_WM(DEBUG_ERROR, F("[FATAL] Unable to enable wifi!"));
 #endif
-      return false;
-    }
+    return false;
+  }
 
-    WiFiSetCountry();
+  WiFiSetCountry();
 
 #ifdef ESP32
-    if (esp32persistent)
-      WiFi.persistent(false); // disable persistent for esp32 after esp_wifi_start or else saves wont work
+  if (esp32persistent)
+    WiFi.persistent(false); // disable persistent for esp32 after esp_wifi_start or else saves wont work
 #endif
 
-    _usermode = WIFI_STA; // When using autoconnect , assume the user wants sta mode on permanently.
+  _usermode = WIFI_STA; // When using autoconnect , assume the user wants sta mode on permanently.
 
-    // no getter for autoreconnectpolicy before this
-    // https://github.com/esp8266/Arduino/pull/4359
-    // so we must force it on else, if not connectimeout then waitforconnectionresult gets stuck endless loop
-    WiFi_autoReconnect();
+  // no getter for autoreconnectpolicy before this
+  // https://github.com/esp8266/Arduino/pull/4359
+  // so we must force it on else, if not connectimeout then waitforconnectionresult gets stuck endless loop
+  WiFi_autoReconnect();
 
 #ifdef ESP8266
-    if (_hostname != "")
-    {
-      setupHostname(true);
-    }
+  if (_hostname != "")
+  {
+    setupHostname(true);
+  }
 #endif
 
-    // if already connected, or try stored connect
-    // @note @todo ESP32 has no autoconnect, so connectwifi will always be called unless user called begin etc before
-    // @todo check if correct ssid == saved ssid when already connected
-    bool connected = false;
-    if (WiFi.status() == WL_CONNECTED)
-    {
-      connected = true;
+  // if already connected, or try stored connect
+  // @note @todo ESP32 has no autoconnect, so connectwifi will always be called unless user called begin etc before
+  // @todo check if correct ssid == saved ssid when already connected
+  bool connected = false;
+  if (WiFi.status() == WL_CONNECTED)
+  {
+    connected = true;
 #ifdef WM_DEBUG_LEVEL
-      DEBUG_WM(F("AutoConnect: ESP Already Connected"));
+    DEBUG_WM(F("AutoConnect: ESP Already Connected"));
 #endif
-      setSTAConfig();
-      // @todo not sure if this is safe, causes dup setSTAConfig in connectwifi,
-      // and we have no idea WHAT we are connected to
-    }
+    setSTAConfig();
+    // @todo not sure if this is safe, causes dup setSTAConfig in connectwifi,
+    // and we have no idea WHAT we are connected to
+  }
 
-    if (connected || connectWifi(_defaultssid, _defaultpass) == WL_CONNECTED)
-    {
+  if (connected || connectWifi(_defaultssid, _defaultpass) == WL_CONNECTED)
+  {
 // connected
 #ifdef WM_DEBUG_LEVEL
-      DEBUG_WM(F("AutoConnect: SUCCESS"));
-      DEBUG_WM(DEBUG_VERBOSE, F("Connected in"), (String)((millis() - _startconn)) + " ms");
-      DEBUG_WM(F("STA IP Address:"), WiFi.localIP());
+    DEBUG_WM(F("AutoConnect: SUCCESS"));
+    DEBUG_WM(DEBUG_VERBOSE, F("Connected in"), (String)((millis() - _startconn)) + " ms");
+    DEBUG_WM(F("STA IP Address:"), WiFi.localIP());
 #endif
-      // Serial.println("Connected in " + (String)((millis()-_startconn)) + " ms");
-      _lastconxresult = WL_CONNECTED;
+    // Serial.println("Connected in " + (String)((millis()-_startconn)) + " ms");
+    _lastconxresult = WL_CONNECTED;
 
-      if (_hostname != "")
-      {
+    if (_hostname != "")
+    {
 #ifdef WM_DEBUG_LEVEL
-        DEBUG_WM(DEBUG_DEV, F("hostname: STA: "), getWiFiHostname());
+      DEBUG_WM(DEBUG_DEV, F("hostname: STA: "), getWiFiHostname());
 #endif
-      }
-      return true; // connected success
     }
+    return true; // connected success
+  }
 
 #ifdef WM_DEBUG_LEVEL
-    DEBUG_WM(F("AutoConnect: FAILED for "), (String)((millis() - _startconn)) + " ms");
+  DEBUG_WM(F("AutoConnect: FAILED for "), (String)((millis() - _startconn)) + " ms");
 #endif
-  }
   // }
   // else {
   // #ifdef WM_DEBUG_LEVEL
