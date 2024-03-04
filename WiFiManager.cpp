@@ -318,7 +318,7 @@ boolean WiFiManager::autoConnect()
  * @param  {[type]} char const         *apPassword [description]
  * @return {[type]}      [description]
  */
-boolean WiFiManager::autoConnect(char const *apName, char const *apPassword)
+boolean WiFiManager::autoConnect(char const *apName, char const *apPassword, void (*failureCallback)())
 {
 #ifdef WM_DEBUG_LEVEL
   DEBUG_WM(F("AutoConnect"));
@@ -419,6 +419,10 @@ boolean WiFiManager::autoConnect(char const *apName, char const *apPassword)
 
 #ifdef WM_DEBUG_LEVEL
   DEBUG_WM(F("AutoConnect: FAILED for "), (String)((millis() - _startconn)) + " ms");
+  if (failureCallback != NULL)
+  {
+    failureCallback(); // 调用回调函数
+  }
 #endif
   // }
   // else {
