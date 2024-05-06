@@ -390,7 +390,7 @@ boolean WiFiManager::autoConnect(char const *apName, char const *apPassword, voi
   {
     connected = true;
 #ifdef WM_DEBUG_LEVEL
-    DEBUG_WM(F("AutoConnect: ESP Already Connected"));
+    DEBUG_WM(F("AutoConnect: FoloToy Already Connected"));
 #endif
     setSTAConfig();
     // @todo not sure if this is safe, causes dup setSTAConfig in connectwifi,
@@ -916,7 +916,7 @@ boolean WiFiManager::startConfigPortal(char const *apName, char const *apPasswor
 
     // status change, break
     // @todo what is this for, should be moved inside the processor
-    // I think.. this is to detect autoconnect by esp in background, there are also many open issues about autoreconnect not working
+    // I think.. this is to detect autoconnect by FoloToy in background, there are also many open issues about autoreconnect not working
     if (state != WL_IDLE_STATUS)
     {
       result = (state == WL_CONNECTED); // true if connected
@@ -976,7 +976,7 @@ boolean WiFiManager::process()
 
 /**
  * [processConfigPortal description]
- * using esp wl_status enums as returns for now, should be fine
+ * using FoloToy wl_status enums as returns for now, should be fine
  * returns WL_IDLE_STATUS or WL_CONNECTED/WL_CONNECT_FAILED upon connect/save flag
  *
  * @return {[type]} [description]
@@ -1199,7 +1199,7 @@ uint8_t WiFiManager::connectWifi(String ssid, String pass, bool connect)
       // if(connect){
       if (_saveTimeout > 0)
       {
-        connRes = waitForConnectResult(_saveTimeout); // use default save timeout for saves to prevent bugs in esp->waitforconnectresult loop
+        connRes = waitForConnectResult(_saveTimeout); // use default save timeout for saves to prevent bugs in FoloToy->waitforconnectresult loop
       }
       else
       {
@@ -1405,7 +1405,7 @@ uint8_t WiFiManager::waitForConnectResult(uint32_t timeout)
   if (timeout == 0)
   {
 #ifdef WM_DEBUG_LEVEL
-    DEBUG_WM(F("connectTimeout not set, ESP waitForConnectResult..."));
+    DEBUG_WM(F("connectTimeout not set, FoloToy waitForConnectResult..."));
 #endif
     return WiFi.waitForConnectResult();
   }
@@ -2696,7 +2696,7 @@ void WiFiManager::handleReset()
   HTTPSend(page);
 
 #ifdef WM_DEBUG_LEVEL
-  DEBUG_WM(F("RESETTING ESP"));
+  DEBUG_WM(F("RESETTING FoloToy"));
 #endif
   delay(1000);
   reboot();
@@ -2736,7 +2736,7 @@ void WiFiManager::handleErase(boolean opt)
   {
     delay(2000);
 #ifdef WM_DEBUG_LEVEL
-    DEBUG_WM(F("RESETTING ESP"));
+    DEBUG_WM(F("RESETTING FoloToy"));
 #endif
     reboot();
   }
@@ -3874,8 +3874,8 @@ void WiFiManager::debugPlatformInfo()
 #elif defined(ESP32)
 #ifdef WM_DEBUG_LEVEL
   DEBUG_WM(F("[SYS] WM version: "), WM_VERSION_STR);
-  DEBUG_WM(F("[SYS] Arduino version: "), VER_ARDUINO_STR);
-  DEBUG_WM(F("[SYS] ESP SDK version: "), ESP.getSdkVersion());
+  DEBUG_WM(F("[SYS] FoloToy version: "), VER_ARDUINO_STR);
+  DEBUG_WM(F("[SYS] FoloToy SDK version: "), ESP.getSdkVersion());
   DEBUG_WM(F("[SYS] Free heap:       "), ESP.getFreeHeap());
 #endif
 

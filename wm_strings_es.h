@@ -80,7 +80,7 @@ const char HTTP_FORM_PARAM_HEAD[]  PROGMEM = "<hr><br/>";
 const char HTTP_FORM_PARAM[]       PROGMEM = "<br/><input id='{i}' name='{n}' maxlength='{l}' value='{v}' {c}>\n"; // do not remove newline!
 
 const char HTTP_SCAN_LINK[]        PROGMEM = "<br/><form action='/wifi?refresh=1' method='POST'><button name='refresh' value='1'>Refresh</button></form>";
-const char HTTP_SAVED[]            PROGMEM = "<div class='msg'>Saving Credentials<br/>Trying to connect ESP to network.<br />If it fails reconnect to AP to try again</div>";
+const char HTTP_SAVED[]            PROGMEM = "<div class='msg'>Saving Credentials<br/>Trying to connect FoloToy to network.<br />If it fails reconnect to AP to try again</div>";
 const char HTTP_PARAMSAVED[]       PROGMEM = "<div class='msg S'>Saved<br/></div>";
 const char HTTP_END[]              PROGMEM = "</div></body></html>";
 const char HTTP_ERASEBTN[]         PROGMEM = "<br/><form action='/erase' method='get'><button class='D'>Erase WiFi Config</button></form>";
@@ -184,14 +184,14 @@ const char HTTP_JS[] PROGMEM =
 // Info html
 // @todo remove html elements from progmem, repetetive strings
 #ifdef ESP32
-	const char HTTP_INFO_esphead[]    PROGMEM = "<h3>esp32</h3><hr><dl>";
+	const char HTTP_INFO_esphead[]    PROGMEM = "<h3>folotoy</h3><hr><dl>";
 	const char HTTP_INFO_chiprev[]    PROGMEM = "<dt>Chip Rev</dt><dd>{1}</dd>";
   	const char HTTP_INFO_lastreset[]  PROGMEM = "<dt>Last reset reason</dt><dd>CPU0: {1}<br/>CPU1: {2}</dd>";
   	const char HTTP_INFO_aphost[]     PROGMEM = "<dt>Access Point Hostname</dt><dd>{1}</dd>";
     const char HTTP_INFO_psrsize[]    PROGMEM = "<dt>PSRAM Size</dt><dd>{1} bytes</dd>";
 	const char HTTP_INFO_temp[]       PROGMEM = "<dt>Temperature</dt><dd>{1} C&deg; / {2} F&deg;</dd><dt>Hall</dt><dd>{3}</dd>";
 #else
-	const char HTTP_INFO_esphead[]    PROGMEM = "<h3>esp8266</h3><hr><dl>";
+	const char HTTP_INFO_esphead[]    PROGMEM = "<h3>folotoy</h3><hr><dl>";
 	const char HTTP_INFO_fchipid[]    PROGMEM = "<dt>Flash Chip ID</dt><dd>{1}</dd>";
 	const char HTTP_INFO_corever[]    PROGMEM = "<dt>Core Version</dt><dd>{1}</dd>";
 	const char HTTP_INFO_bootver[]    PROGMEM = "<dt>Boot Version</dt><dd>{1}</dd>";
@@ -223,8 +223,8 @@ const char HTTP_INFO_conx[]       PROGMEM = "<dt>Connected</dt><dd>{1}</dd>";
 const char HTTP_INFO_autoconx[]   PROGMEM = "<dt>Autoconnect</dt><dd>{1}</dd>";
 
 const char HTTP_INFO_aboutver[]     PROGMEM = "<dt>WiFiManager</dt><dd>{1}</dd>";
-const char HTTP_INFO_aboutarduino[] PROGMEM = "<dt>Arduino</dt><dd>{1}</dd>";
-const char HTTP_INFO_aboutsdk[]     PROGMEM = "<dt>ESP-SDK/IDF</dt><dd>{1}</dd>";
+const char HTTP_INFO_aboutarduino[] PROGMEM = "<dt>FoloToy</dt><dd>{1}</dd>";
+const char HTTP_INFO_aboutsdk[]     PROGMEM = "<dt>FoloToy-SDK/IDF</dt><dd>{1}</dd>";
 const char HTTP_INFO_aboutdate[]    PROGMEM = "<dt>Build Date</dt><dd>{1}</dd>";
 
 const char S_brand[]              PROGMEM = "WiFiManager";
@@ -239,7 +239,7 @@ const char S_NA[]                 PROGMEM = "Unknown";
 const char S_passph[]             PROGMEM = "********";
 const char S_titlewifisaved[]     PROGMEM = "Credentials Saved";
 const char S_titlewifisettings[]  PROGMEM = "Settings Saved";
-const char S_titlewifi[]          PROGMEM = "Config ESP";
+const char S_titlewifi[]          PROGMEM = "Config FoloToy";
 const char S_titleinfo[]          PROGMEM = "Info";
 const char S_titleparam[]         PROGMEM = "Setup";
 const char S_titleparamsaved[]    PROGMEM = "Setup Saved";
@@ -269,9 +269,9 @@ const char D_HR[]                 PROGMEM = "--------------------";
 
 // softap ssid default prefix
 #ifdef ESP8266
-    const char S_ssidpre[]        PROGMEM = "ESP";
+    const char S_ssidpre[]        PROGMEM = "FoloToy";
 #elif defined(ESP32)
-    const char S_ssidpre[]        PROGMEM = "ESP32";
+    const char S_ssidpre[]        PROGMEM = "FoloToy";
 #else
     const char S_ssidpre[]        PROGMEM = "WM";
 #endif
