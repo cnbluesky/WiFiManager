@@ -11,6 +11,7 @@
  */
 
 #include "WiFiManager.h"
+#include "nvs_flash.h"
 
 #if defined(ESP8266) || defined(ESP32)
 
@@ -2296,9 +2297,11 @@ void WiFiManager::handleInfo()
 
 #elif defined(ESP32)
   // add esp_chip_info ?
-  infos = 27;
+  infos = 19;
   String infoids[] = {
       F("esphead"),
+      F("SN"),
+      F("KEY"),
       F("uptime"),
       F("chipid"),
       F("chiprev"),
@@ -2309,23 +2312,24 @@ void WiFiManager::handleInfo()
       F("memsketch"),
       F("memsmeter"),
       F("lastreset"),
-      F("temp"),
+      // F("temp"),
       // F("hall"),
       F("wifihead"),
-      F("conx"),
-      F("stassid"),
-      F("staip"),
-      F("stagw"),
-      F("stasub"),
-      F("dnss"),
+      // F("conx"),
+      // F("stassid"),
+      // F("staip"),
+      // F("stagw"),
+      // F("stasub"),
+      // F("dnss"),
       F("host"),
       F("stamac"),
       F("apssid"),
       F("wifiaphead"),
       F("apip"),
-      F("apmac"),
-      F("aphost"),
-      F("apbssid")};
+      // F("apmac"),
+      // F("aphost"),
+      // F("apbssid")
+      };
 #endif
 
   for (size_t i = 0; i < infos; i++)
@@ -2335,12 +2339,12 @@ void WiFiManager::handleInfo()
   }
   page += F("</dl>");
 
-  page += F("<h3>About</h3><hr><dl>");
-  page += getInfoData("aboutver");
-  page += getInfoData("aboutarduinover");
-  page += getInfoData("aboutidfver");
-  page += getInfoData("aboutdate");
-  page += F("</dl>");
+  // page += F("<h3>About</h3><hr><dl>");
+  // page += getInfoData("aboutver");
+  // page += getInfoData("aboutarduinover");
+  // page += getInfoData("aboutidfver");
+  // page += getInfoData("aboutdate");
+  // page += F("</dl>");
 
   if (_showInfoUpdate)
   {
@@ -2361,8 +2365,65 @@ void WiFiManager::handleInfo()
 #endif
 }
 
+esp_err_t init_folotoy_partition()
+{
+  // 初始化 NVS
+  esp_err_t err = nvs_flash_init_partition("folotoy");
+  if (err != ESP_OK)
+  {
+    printf("Error (%s) initializing NVS partition!\n", esp_err_to_name(err));
+  }
+  return err;
+}
+
+bool get_device_info(char *device_sn, size_t sn_size, char *device_key, size_t key_size)
+{
+  esp_err_t err = init_folotoy_partition();
+  if (err != ESP_OK)
+  {
+    return false;
+  }
+
+  // 打开 NVS
+  nvs_handle_t my_handle;
+  err = nvs_open_from_partition("folotoy", "folotoy-key", NVS_READONLY, &my_handle);
+  if (err != ESP_OK)
+  {
+    printf("Error (%s) opening NVS handle!\n", esp_err_to_name(err));
+    return false;
+  }
+
+  // 读取 "DeviceKey" 和 "DeviceSecret"
+  err = nvs_get_str(my_handle, "DeviceKey", device_sn, &sn_size);
+  if (err != ESP_OK)
+  {
+    printf("Error reading SN!\n");
+    nvs_close(my_handle);
+    return false;
+  }
+
+  err = nvs_get_str(my_handle, "DeviceSecret", device_key, &key_size);
+  if (err != ESP_OK)
+  {
+    printf("Error reading KEY!\n");
+    nvs_close(my_handle);
+    return false;
+  }
+
+  nvs_close(my_handle);
+  return true;
+}
+
 String WiFiManager::getInfoData(String id)
 {
+  static char device_sn[64];
+  static char device_key[64];
+  static bool device_info_loaded = false;
+
+  if (!device_info_loaded)
+  {
+    device_info_loaded = get_device_info(device_sn, sizeof(device_sn), device_key, sizeof(device_key));
+  }
 
   String p;
   if (id == F("esphead"))
@@ -2376,6 +2437,30 @@ String WiFiManager::getInfoData(String id)
   {
     p = FPSTR(HTTP_INFO_wifihead);
     p.replace(FPSTR(T_1), getModeString(WiFi.getMode()));
+  }
+  else if (id == F("SN"))
+  {
+    p = FPSTR(HTTP_INFO_SN);
+    if (device_info_loaded)
+    {
+      p.replace(FPSTR(T_1), (String)device_sn);
+    }
+    else
+    {
+      p.replace(FPSTR(T_1), "");
+    }
+  }
+  else if (id == F("KEY"))
+  {
+    p = FPSTR(HTTP_INFO_KEY);
+    if (device_info_loaded)
+    {
+      p.replace(FPSTR(T_1), (String)device_key);
+    }
+    else
+    {
+      p.replace(FPSTR(T_1), "");
+    }
   }
   else if (id == F("uptime"))
   {
@@ -2531,17 +2616,17 @@ String WiFiManager::getInfoData(String id)
     p = FPSTR(HTTP_INFO_apip);
     p.replace(FPSTR(T_1), WiFi.softAPIP().toString());
   }
-  else if (id == F("apmac"))
-  {
-    p = FPSTR(HTTP_INFO_apmac);
-    p.replace(FPSTR(T_1), (String)WiFi.softAPmacAddress());
-  }
+  // else if (id == F("apmac"))
+  // {
+  //   p = FPSTR(HTTP_INFO_apmac);
+  //   p.replace(FPSTR(T_1), (String)WiFi.softAPmacAddress());
+  // }
 #ifdef ESP32
-  else if (id == F("aphost"))
-  {
-    p = FPSTR(HTTP_INFO_aphost);
-    p.replace(FPSTR(T_1), WiFi.softAPgetHostname());
-  }
+  // else if (id == F("aphost"))
+  // {
+  //   p = FPSTR(HTTP_INFO_aphost);
+  //   p.replace(FPSTR(T_1), WiFi.softAPgetHostname());
+  // }
 #endif
 #ifndef WM_NOSOFTAPSSID
 #ifdef ESP8266
@@ -2552,41 +2637,41 @@ String WiFiManager::getInfoData(String id)
   }
 #endif
 #endif
-  else if (id == F("apbssid"))
-  {
-    p = FPSTR(HTTP_INFO_apbssid);
-    p.replace(FPSTR(T_1), (String)WiFi.BSSIDstr());
-  }
-  // softAPgetHostname // esp32
-  // softAPSubnetCIDR
-  // softAPNetworkID
-  // softAPBroadcastIP
+  // else if (id == F("apbssid"))
+  // {
+  //   p = FPSTR(HTTP_INFO_apbssid);
+  //   p.replace(FPSTR(T_1), (String)WiFi.BSSIDstr());
+  // }
+  // // softAPgetHostname // esp32
+  // // softAPSubnetCIDR
+  // // softAPNetworkID
+  // // softAPBroadcastIP
 
-  else if (id == F("stassid"))
-  {
-    p = FPSTR(HTTP_INFO_stassid);
-    p.replace(FPSTR(T_1), htmlEntities((String)WiFi_SSID()));
-  }
-  else if (id == F("staip"))
-  {
-    p = FPSTR(HTTP_INFO_staip);
-    p.replace(FPSTR(T_1), WiFi.localIP().toString());
-  }
-  else if (id == F("stagw"))
-  {
-    p = FPSTR(HTTP_INFO_stagw);
-    p.replace(FPSTR(T_1), WiFi.gatewayIP().toString());
-  }
-  else if (id == F("stasub"))
-  {
-    p = FPSTR(HTTP_INFO_stasub);
-    p.replace(FPSTR(T_1), WiFi.subnetMask().toString());
-  }
-  else if (id == F("dnss"))
-  {
-    p = FPSTR(HTTP_INFO_dnss);
-    p.replace(FPSTR(T_1), WiFi.dnsIP().toString());
-  }
+  // else if (id == F("stassid"))
+  // {
+  //   p = FPSTR(HTTP_INFO_stassid);
+  //   p.replace(FPSTR(T_1), htmlEntities((String)WiFi_SSID()));
+  // }
+  // else if (id == F("staip"))
+  // {
+  //   p = FPSTR(HTTP_INFO_staip);
+  //   p.replace(FPSTR(T_1), WiFi.localIP().toString());
+  // }
+  // else if (id == F("stagw"))
+  // {
+  //   p = FPSTR(HTTP_INFO_stagw);
+  //   p.replace(FPSTR(T_1), WiFi.gatewayIP().toString());
+  // }
+  // else if (id == F("stasub"))
+  // {
+  //   p = FPSTR(HTTP_INFO_stasub);
+  //   p.replace(FPSTR(T_1), WiFi.subnetMask().toString());
+  // }
+  // else if (id == F("dnss"))
+  // {
+  //   p = FPSTR(HTTP_INFO_dnss);
+  //   p.replace(FPSTR(T_1), WiFi.dnsIP().toString());
+  // }
   else if (id == F("host"))
   {
     p = FPSTR(HTTP_INFO_host);
@@ -2601,11 +2686,11 @@ String WiFiManager::getInfoData(String id)
     p = FPSTR(HTTP_INFO_stamac);
     p.replace(FPSTR(T_1), WiFi.macAddress());
   }
-  else if (id == F("conx"))
-  {
-    p = FPSTR(HTTP_INFO_conx);
-    p.replace(FPSTR(T_1), WiFi.isConnected() ? FPSTR(S_y) : FPSTR(S_n));
-  }
+  // else if (id == F("conx"))
+  // {
+  //   p = FPSTR(HTTP_INFO_conx);
+  //   p.replace(FPSTR(T_1), WiFi.isConnected() ? FPSTR(S_y) : FPSTR(S_n));
+  // }
 #ifdef ESP8266
   else if (id == F("autoconx"))
   {
@@ -2614,51 +2699,51 @@ String WiFiManager::getInfoData(String id)
   }
 #endif
 #if defined(ESP32) && !defined(WM_NOTEMP)
-  else if (id == F("temp"))
-  {
-    // temperature is not calibrated, varying large offsets are present, use for relative temp changes only
-    p = FPSTR(HTTP_INFO_temp);
-    p.replace(FPSTR(T_1), (String)temperatureRead());
-    p.replace(FPSTR(T_2), (String)((temperatureRead() + 32) * 1.8f));
-  }
+  // else if (id == F("temp"))
+  // {
+  //   // temperature is not calibrated, varying large offsets are present, use for relative temp changes only
+  //   p = FPSTR(HTTP_INFO_temp);
+  //   p.replace(FPSTR(T_1), (String)temperatureRead());
+  //   p.replace(FPSTR(T_2), (String)((temperatureRead() + 32) * 1.8f));
+  // }
 // else if(id==F("hall")){
 //   p = FPSTR(HTTP_INFO_hall);
 //   p.replace(FPSTR(T_1),(String)hallRead()); // hall sensor reads can cause issues with adcs
 // }
 #endif
-  else if (id == F("aboutver"))
-  {
-    p = FPSTR(HTTP_INFO_aboutver);
-    p.replace(FPSTR(T_1), FPSTR(WM_VERSION_STR));
-  }
-  else if (id == F("aboutarduinover"))
-  {
-#ifdef VER_ARDUINO_STR
-    p = FPSTR(HTTP_INFO_aboutarduino);
-    p.replace(FPSTR(T_1), String(VER_ARDUINO_STR));
-#endif
-  }
-  // else if(id==F("aboutidfver")){
-  //   #ifdef VER_IDF_STR
-  //   p = FPSTR(HTTP_INFO_aboutidf);
-  //   p.replace(FPSTR(T_1),String(VER_IDF_STR));
-  //   #endif
-  // }
-  else if (id == F("aboutsdkver"))
-  {
-    p = FPSTR(HTTP_INFO_sdkver);
-#ifdef ESP32
-    p.replace(FPSTR(T_1), (String)esp_get_idf_version());
-    // p.replace(FPSTR(T_1),(String)system_get_sdk_version()); // deprecated
-#else
-    p.replace(FPSTR(T_1), (String)system_get_sdk_version());
-#endif
-  }
-  else if (id == F("aboutdate"))
-  {
-    p = FPSTR(HTTP_INFO_aboutdate);
-    p.replace(FPSTR(T_1), String(__DATE__ " " __TIME__));
-  }
+//   else if (id == F("aboutver"))
+//   {
+//     p = FPSTR(HTTP_INFO_aboutver);
+//     p.replace(FPSTR(T_1), FPSTR(WM_VERSION_STR));
+//   }
+//   else if (id == F("aboutarduinover"))
+//   {
+// #ifdef VER_ARDUINO_STR
+//     p = FPSTR(HTTP_INFO_aboutarduino);
+//     p.replace(FPSTR(T_1), String(VER_ARDUINO_STR));
+// #endif
+//   }
+//   // else if(id==F("aboutidfver")){
+//   //   #ifdef VER_IDF_STR
+//   //   p = FPSTR(HTTP_INFO_aboutidf);
+//   //   p.replace(FPSTR(T_1),String(VER_IDF_STR));
+//   //   #endif
+//   // }
+//   else if (id == F("aboutsdkver"))
+//   {
+//     p = FPSTR(HTTP_INFO_sdkver);
+// #ifdef ESP32
+//     p.replace(FPSTR(T_1), (String)esp_get_idf_version());
+//     // p.replace(FPSTR(T_1),(String)system_get_sdk_version()); // deprecated
+// #else
+//     p.replace(FPSTR(T_1), (String)system_get_sdk_version());
+// #endif
+//   }
+//   else if (id == F("aboutdate"))
+//   {
+//     p = FPSTR(HTTP_INFO_aboutdate);
+//     p.replace(FPSTR(T_1), String(__DATE__ " " __TIME__));
+//   }
   return p;
 }
 
