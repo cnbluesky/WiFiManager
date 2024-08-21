@@ -673,6 +673,7 @@ class WiFiManager
 	void          handleUpdating();
 	void          handleUpdateDone();
 
+    void          handleTerms();
 
     // wifi platform abstractions
     bool          WiFi_Mode(WiFiMode_t m);

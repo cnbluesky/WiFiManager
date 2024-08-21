@@ -752,6 +752,7 @@ void WiFiManager::setupHTTPServer()
   server->on(WM_G(R_erase), std::bind(&WiFiManager::handleErase, this, false));
   server->on(WM_G(R_status), std::bind(&WiFiManager::handleWiFiStatus, this));
   server->onNotFound(std::bind(&WiFiManager::handleNotFound, this));
+  server->on(WM_G(R_terms), std::bind(&WiFiManager::handleTerms, this));
 
   server->on(WM_G(R_update), std::bind(&WiFiManager::handleUpdate, this));
   server->on(WM_G(R_updatedone), HTTP_POST, std::bind(&WiFiManager::handleUpdateDone, this), std::bind(&WiFiManager::handleUpdating, this));
@@ -2852,6 +2853,15 @@ void WiFiManager::handleNotFound()
   server->sendHeader(F("Pragma"), F("no-cache"));
   server->sendHeader(F("Expires"), F("-1"));
   server->send(404, FPSTR(HTTP_HEAD_CT2), message);
+}
+
+void WiFiManager::handleTerms()
+{
+  handleRequest();
+  String page = getHTTPHead(FPSTR(S_titleterms)); // @token titleterms
+  page += FPSTR(S_terms);                         // @token terms
+  page += FPSTR(HTTP_END);
+  HTTPSend(page);
 }
 
 /**

@@ -242,6 +242,7 @@ const char S_titleexit[]          PROGMEM = "Exit";
 const char S_titlereset[]         PROGMEM = "Reset";
 const char S_titleerase[]         PROGMEM = "Erase";
 const char S_titleclose[]         PROGMEM = "Close";
+const char S_titleterms[]         PROGMEM = "Terms";
 const char S_options[]            PROGMEM = "options";
 const char S_nonetworks[]         PROGMEM = "No networks found. Refresh to scan again.";
 const char S_staticip[]           PROGMEM = "Static IP";
@@ -257,6 +258,7 @@ const char S_uri[]                PROGMEM = "URI: ";
 const char S_method[]             PROGMEM = "\nMethod: ";
 const char S_args[]               PROGMEM = "\nArguments: ";
 const char S_parampre[]           PROGMEM = "param_";
+const char S_terms[]              PROGMEM = "Terms of service";
 
 // debug strings
 const char D_HR[]                 PROGMEM = "--------------------";
