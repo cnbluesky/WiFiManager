@@ -753,7 +753,7 @@ void WiFiManager::setupHTTPServer()
   server->on(WM_G(R_status), std::bind(&WiFiManager::handleWiFiStatus, this));
   server->onNotFound(std::bind(&WiFiManager::handleNotFound, this));
   server->on(WM_G(R_terms), std::bind(&WiFiManager::handleTerms, this));
-
+  server->on(WM_G(R_privacy), std::bind(&WiFiManager::handlePrivacy, this));
   server->on(WM_G(R_update), std::bind(&WiFiManager::handleUpdate, this));
   server->on(WM_G(R_updatedone), HTTP_POST, std::bind(&WiFiManager::handleUpdateDone, this), std::bind(&WiFiManager::handleUpdating, this));
 
@@ -2858,8 +2858,27 @@ void WiFiManager::handleNotFound()
 void WiFiManager::handleTerms()
 {
   handleRequest();
-  String page = getHTTPHead(FPSTR(S_titleterms)); // @token titleterms
-  page += FPSTR(S_terms);                         // @token terms
+  String page;
+  page += FPSTR(HTTP_HEAD_START);
+  page.replace(FPSTR(T_v), FPSTR(S_titleterms));
+  page += FPSTR(HTTP_AGREEMENTS_STYLE);
+  page += _customHeadElement;
+  page += FPSTR(HTTP_AGREEMENT_HEAD_END);
+  page += FPSTR(HTTP_TERMS);
+  page += FPSTR(HTTP_END);
+  HTTPSend(page);
+}
+
+void WiFiManager::handlePrivacy()
+{
+  handleRequest();
+  String page;
+  page += FPSTR(HTTP_HEAD_START);
+  page.replace(FPSTR(T_v), FPSTR(S_titleprivacy));
+  page += FPSTR(HTTP_AGREEMENTS_STYLE);
+  page += _customHeadElement;
+  page += FPSTR(HTTP_AGREEMENT_HEAD_END);
+  page += FPSTR(HTTP_PRIVACY);
   page += FPSTR(HTTP_END);
   HTTPSend(page);
 }

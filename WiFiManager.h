@@ -674,6 +674,7 @@ class WiFiManager
 	void          handleUpdateDone();
 
     void          handleTerms();
+    void          handlePrivacy();
 
     // wifi platform abstractions
     bool          WiFi_Mode(WiFiMode_t m);

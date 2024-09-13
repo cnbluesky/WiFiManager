@@ -61,6 +61,7 @@ const char R_status[]             PROGMEM = "/status";
 const char R_update[]             PROGMEM = "/update";
 const char R_updatedone[]         PROGMEM = "/u";
 const char R_terms[]              PROGMEM = "/terms";
+const char R_privacy[]            PROGMEM = "/privacy";
 
 
 //Strings
